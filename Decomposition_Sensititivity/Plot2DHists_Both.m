@@ -25,7 +25,7 @@ switch type{ii}
 end
 m = 2;
 figure(m*10); sgtitle(['Holes for ' type{ii}],'interpreter','latex')
-subplot(1,3,1);
+subplot(2,4,1);
 [lam_bin,k_bin,h] = ndhist(lam{1}(:),k{1}(:),'axis',[1,0;1.8,1]-0.005);
 LAM_BIN{1,1} = lam_bin;
 K_BIN{1,1} = k_bin;
@@ -47,7 +47,7 @@ colormap turbo;
 % set(gca,'YDir','normal');
 
 
-subplot(1,3,2);
+subplot(2,4,2);
 [lam_bin,k_bin,h] = ndhist(lam{2}(:),k{2}(:),'axis',[1,0;1.8,1]-0.005);
 LAM_BIN{1,2} = lam_bin;
 K_BIN{1,2} = k_bin;
@@ -62,6 +62,70 @@ ylabel('k')
 xlabel('$\lambda$','interpreter','latex')
 title('u=5$\,$mm','interpreter','latex')
 colormap turbo;
+
+subplot(2,4,3)
+[lam_bin_,k_bin_,h_] = ndhist(lam{1}(:),k{1}(:),'axis',[1,0;1.8,1]-0.005);
+imagesc(log10(-h_.*log10(h_)/(sum(-h_.*log10(h_),"all",'omitnan')))); caxis(clim); colormap turbo;
+set(gca,'YDir','normal')
+axis square
+ylabel('k')
+xlabel('$\lambda$','interpreter','latex')
+title('$hlog(h)/{\Sigma}(hlog(h))$: u=2.5$\,$mm','interpreter','latex')
+colormap turbo; 
+
+subplot(2,4,4)
+[lam_bin_,k_bin_,h_] = ndhist(lam{2}(:),k{2}(:),'axis',[1,0;1.8,1]-0.005);
+imagesc(log10(-h_.*log10(h_)/(sum(-h_.*log10(h_),"all",'omitnan')))); caxis(clim); colormap turbo;
+set(gca,'YDir','normal')
+axis square
+ylabel('k')
+xlabel('$\lambda$','interpreter','latex')
+title('$hlog(h)/{\Sigma}(hlog(h))$: u=5$\,$mm','interpreter','latex')
+colormap turbo; 
+
+subplot(2,4,5)
+[lam_bin_,k_bin_,h_] = ndhist(lam{1}(:),k{1}(:),'axis',[1,0;1.8,1]-0.005);
+p_ = h_./sum(h_(:));
+imagesc(log10(-p_.*log10(p_))); caxis(clim); colormap turbo;
+set(gca,'YDir','normal')
+axis square
+ylabel('k')
+xlabel('$\lambda$','interpreter','latex')
+title('$plog(p)$: u=2.5$\,$mm','interpreter','latex')
+colormap turbo; 
+
+subplot(2,4,6)
+[lam_bin_,k_bin_,h_] = ndhist(lam{2}(:),k{2}(:),'axis',[1,0;1.8,1]-0.005);
+p_ = h_./sum(h_(:));
+imagesc(log10(-p_.*log10(p_))); caxis(clim); colormap turbo;
+set(gca,'YDir','normal')
+axis square
+ylabel('k')
+xlabel('$\lambda$','interpreter','latex')
+title('$plog(p)$: u=5$\,$mm','interpreter','latex')
+colormap turbo; 
+
+subplot(2,4,7)
+[lam_bin_,k_bin_,h_] = ndhist(lam{1}(:),k{1}(:),'axis',[1,0;1.8,1]-0.005);
+p_ = h_./sum(h_(:));
+imagesc(log10(-p_.*p_.*log10(p_))); caxis(clim); colormap turbo;
+set(gca,'YDir','normal')
+axis square
+ylabel('k')
+xlabel('$\lambda$','interpreter','latex')
+title('$p^2log(p)$: u=5$\,$mm','interpreter','latex')
+colormap turbo; 
+
+subplot(2,4,8)
+[lam_bin_,k_bin_,h_] = ndhist(lam{2}(:),k{2}(:),'axis',[1,0;1.8,1]-0.005);
+p_ = h_./sum(h_(:));
+imagesc(log10(-p_.*p_.*log10(p_))); caxis(clim); colormap turbo;
+set(gca,'YDir','normal')
+axis square
+ylabel('k')
+xlabel('$\lambda$','interpreter','latex')
+title('$p^2log(p)$: u=5$\,$mm','interpreter','latex')
+colormap turbo; 
 
 saveas(gcf,[flt '/k_lam_SensitivityPlots/' type{ii} '/histo_holes' fn '.png']);
 saveas(gcf,[flt '/k_lam_SensitivityPlots/' type{ii} '/histo_holes' fn '.pdf']);
@@ -313,3 +377,47 @@ warning on;
 % figure; imagesc(squeeze(Salpha_all(:,1,:))') % a = -3
 % set(gca,'YDir','normal'); axis image;
 % axis square;
+
+%% Entropy calculation (sim and exp)
+all_entropy = ones(1,10); % know the size for this, can change later
+S_ent_all = ones(1,10);
+for ii = 1:length(H_)
+    for jj = 1:length(H_{ii})
+        p = H_{ii}{jj}./sum(H_{ii}{jj}(:));
+        entropy = -sum(p.*log(p),'all','omitnan');
+        S_ent = -sum(p.*p.*log(p),'all','omitnan');
+        all_entropy((ii-1)*length(H_{ii})+jj) = entropy;
+        S_ent_all((ii-1)*length(H_{ii})+jj) = S_ent;
+        switch ii
+            case 1
+                cur_label{1} = 'Sim: ';
+            case 2
+                cur_label{1} = 'Exp: ';
+        end
+        switch jj
+            case 1
+                cur_label{2} = 'Holes, 2.5mm';
+            case 2
+                cur_label{2} = 'Holes, 5mm';
+            case 3
+                cur_label{2} = 'No Holes, 2.5mm';
+            case 4
+                cur_label{2} = 'No Holes, 5mm';
+            case 5
+                cur_label{2} = 'No Holes, 7mm';
+        end
+        labels{(ii-1)*length(H_{ii})+jj} = [cur_label{1} cur_label{2}];
+    end     
+end    
+figure()
+% bar(all_entropy)
+plot([2.5 5], all_entropy(1:2),[2.5 5 7],all_entropy(3:5),[2.5 5], all_entropy(6:7),[2.5 5 7],all_entropy(8:10))
+legend('Sim: Holes','Sim: No Holes','Exp: Holes','Exp: No Holes','Location','southeast')
+xlabel('displacement [mm]')
+ylabel('entropy')
+figure()
+% bar(all_entropy)
+plot([2.5 5], S_ent_all(1:2),[2.5 5 7],S_ent_all(3:5),[2.5 5], S_ent_all(6:7),[2.5 5 7],S_ent_all(8:10))
+legend('Sim: Holes','Sim: No Holes','Exp: Holes','Exp: No Holes','Location','southeast')
+xlabel('displacement [mm]')
+ylabel('p^2log(p)')
