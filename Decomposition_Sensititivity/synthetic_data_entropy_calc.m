@@ -15,34 +15,6 @@ sigma_lam = 0.5;
 % max number of data points
 n = 8;
 
-%% Analytical expected entropy
-% mu_k = 0.5;
-% mu_lam = 1.4;
-% 
-% syms l_ k_;
-% % analytical expression for entropy of a Gaussian distribution
-% % entropy = -plog(p)
-% 
-% sigma_range = (0.1:0.1:5);
-% ea = zeros(length(sigma_range));
-% for ii = 1:length(sigma_range)
-%     for jj = 1:length(sigma_range)
-%         sigma_k = sigma_range(ii);
-%         sigma_lam = sigma_range(jj);
-%         entr_ = @(l_,k_)(-(1/(2*pi*sigma_k*sigma_lam))*exp(-((mu_lam-l_) ...
-%             .^2)./(2*sigma_lam.^2) - ((mu_k-k_).^2)./(2.*sigma_k.^2))) ...
-%             .*log((1./(2*pi.*sigma_k.*sigma_lam)).*exp(-((mu_lam-l_).^2) ...
-%             ./(2.*sigma_lam.^2) - ((mu_k-k_).^2)./(2.*sigma_k.^2)));
-%         entropy_analytical = integral2(entr_,mu_lam-20*sigma_lam, ...
-%             mu_lam+20*sigma_lam,mu_k-20*sigma_k,mu_k+20*sigma_k);
-%         ea(ii,jj) = entropy_analytical;
-%     end
-% end    
-% surf(sigma_range,sigma_range,ea)
-% xlabel('\sigma_k')
-% ylabel('\sigma_{\lambda}')
-% zlabel('entropy')
-
 %% make Gaussians
 entropy_all = ones(1,n-2);
 p2ent_all = ones(1,n-2);
