@@ -9,6 +9,8 @@ load('22-1215-Wavy_Sweep\sensitivity.mat');
 amplitudes = linspace(0,2,11);
 all_diff_ent = zeros(1,11);
 all_pwise_ent = all_diff_ent;
+all_outlier_ent = all_diff_ent;
+all_outlier_contrib = all_diff_ent;
 for ii=1:11
     % X1 = lam, X2 = k
     X = [lam{ii}' k{ii}'];
@@ -75,11 +77,40 @@ for ii=1:11
     zlabel('error')
     title('scaled hist - Gaussian fit')
 
+    %% Look at histogram points "outside" of the Gaussian and contribution
+    % to entropy
+    % Look at locations where Gaussian is <10% of max value (chosen arbitrarily)
+    cutoff = max(max(gmPDF(LAM,K)))*.1;
+    H_outlier = -sum(p(gmPDF(LAM,K)<cutoff).*log(p(gmPDF(LAM,K)<cutoff)), 'all','omitnan')
+    all_outlier_ent(ii) = H_outlier;
+    outlier_contrib = H_outlier/H_pwise
+    all_outlier_contrib(ii) = outlier_contrib;
+    % Visualise this outlier data
+    % "turn off" the region inside the Gaussian
+    p_scaled(gmPDF(LAM,K)>=cutoff)=0;
+    figure()
+    surf(LAM,K,p_scaled)
+    colormap turbo
+    title('points outside Gaussian')
+    xlabel('\lambda')
+    ylabel('k')
+    zlabel('probability')
+    zlim([0 max(max(gmPDF(LAM,K)))])
+
 end
 %% Plot all entropy values
 figure()
-plot(amplitudes,all_diff_ent,amplitudes,all_pwise_ent)
+plot(amplitudes,all_diff_ent,'LineWidth',2)
+hold on
+plot(amplitudes,all_pwise_ent,'LineWidth',2)
+plot(amplitudes,all_outlier_ent,'LineWidth',2)
+hold off
 xlabel('Wave amplitude')
 ylabel('simulation entropy')
-legend('Gaussian entropy','pointwise entropy')
+legend('Gaussian entropy','pointwise entropy','outlier entropy','Location','northwest')
 % xlim([0,0.8])
+figure()
+plot(amplitudes,all_outlier_contrib*100,'LineWidth',2)
+title('relative entropy contribution of outlier data')
+xlabel('Wave amplitude')
+ylabel('percentage contribution')
