@@ -13,7 +13,10 @@ for ii = 1:length(sigma_range)
     for jj = 1:length(sigma_range)
         sigma_k = sigma_range(ii);
         sigma_lam = sigma_range(jj);
-        entr_ = @(l_,k_)(-(1/(2*pi*sigma_k*sigma_lam))*exp(-((mu_lam-l_).^2)./(2*sigma_lam.^2) - ((mu_k-k_).^2)./(2.*sigma_k.^2))).*log((1./(2*pi.*sigma_k.*sigma_lam)).*exp(-((mu_lam-l_).^2)./(2.*sigma_lam.^2) - ((mu_k-k_).^2)./(2.*sigma_k.^2)));
+        entr_ = @(l_,k_)(-(1/(2*pi*sigma_k*sigma_lam))*exp(-((mu_lam-l_) ...
+            .^2)./(2*sigma_lam.^2) - ((mu_k-k_).^2)./(2.*sigma_k.^2))) ...
+            .*log((1./(2*pi.*sigma_k.*sigma_lam)).*exp(-((mu_lam-l_).^2) ...
+            ./(2.*sigma_lam.^2) - ((mu_k-k_).^2)./(2.*sigma_k.^2)));
         k_min = 0;% mu_k-20*sigma_k; % 0
         k_max = 1;%mu_k+20*sigma_k; % 1
         lam_min = 1;%mu_lam-20*sigma_lam; % 1

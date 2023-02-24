@@ -7,7 +7,8 @@ addpath(genpath('InputFiles'))
 % curdir = '22-0301-NoHoles_SS';
 % curdir = '22-0325-Uniaxial';
 % curdir = '22-1212-Wavy_SS';
-curdir = '22-1215-Wavy_Sweep';
+% curdir = '22-1215-Wavy_Sweep';
+curdir = '22-1215-Wavy_Sweep_v2';
 
 params = 'ogden-treloar';
 
@@ -35,6 +36,12 @@ switch curdir
         pres_disp{1} = 6.25; pres_disp{2} = 6.25;
     case '22-1215-Wavy_Sweep'
          sin_sweep = linspace(0,2,11);
+        for iii = 1:length(sin_sweep)
+            A{iii} = ['ShearWavy_6.25MMDisp_Amp_' num2str(sin_sweep(iii))];
+            pres_disp{iii} = 6.25;
+        end
+    case '22-1215-Wavy_Sweep_v2'
+        sin_sweep = linspace(0,2,11);
         for iii = 1:length(sin_sweep)
             A{iii} = ['ShearWavy_6.25MMDisp_Amp_' num2str(sin_sweep(iii))];
             pres_disp{iii} = 6.25;
@@ -175,7 +182,8 @@ if saveset
             end
         case 'tet'
             switch curdir
-                case {'22-0201-5MM_Holes_SS','22-0301-NoHoles_SS','22-0325-Uniaxial','22-1212-Wavy_SS','22-1215-Wavy_Sweep'}
+                case {'22-0201-5MM_Holes_SS','22-0301-NoHoles_SS','22-0325-Uniaxial','22-1212-Wavy_SS','22-1215-Wavy_Sweep',...
+                        '22-1215-Wavy_Sweep_v2'}
                     if ~exist(['Simulations_tet\' curdir], 'dir')
                         mkdir(['Simulations_tet\' curdir])
                     end

@@ -21,9 +21,10 @@ def ufl_simplicial_order(P):
     return np.sort(np.array(P), axis=None).tolist()	
 
 # filename = "STA26_27"
-loadPath = "./Data/22-1215-Wavy_Sweep/ShearWavy_6.25MMDisp_Amp_0.6_tet/"
-savePath = loadPath
-filename = "ShearWavy_6.25MMDisp_Amp_0.6_tet_test"
+# loadPath = "./InputFiles/22-1215-Wavy_Sweep_v2/"
+loadPath = "./InputFiles/22-1215-Wavy_Sweep/"
+savePath = "./MeshForVSI/WavySweep06Amp_tet10"
+filename = "ShearWavy_6.25MMDisp_Amp_0.6_tet"
 
 def msh2xdmf(loadPath,savePath,filename):
 
@@ -43,14 +44,14 @@ def msh2xdmf(loadPath,savePath,filename):
     #HexCellsDataID = msh.cell_data['gmsh:physical'][0]
 
     for i in range(NumVertex):
-        editor.add_vertex(i, Point(msh.points[i,:4]))
+        editor.add_vertex(i, Point(msh.points[i,:]))
     for i in range(NumCells):
         try:
             #_cell_gmsh = msh.cells[0].data[i,:]
             #_cell_vtk = gmsh2vtk_hex(_cell_gmsh)
             #_cell_vtk = msh.cells[0].data[i,:]
             #_cell_dolfin = vtk2dolfin_hex(_cell_vtk)			
-            _cell_dolfin = ufl_simplicial_order(msh.cells[0].data[i,:4])
+            _cell_dolfin = ufl_simplicial_order(msh.cells[0].data[i,:])
             editor.add_cell(i,_cell_dolfin)
         except RuntimeError:
             print("Error in cell index %i"%i)
@@ -123,3 +124,4 @@ def msh2xdmf(loadPath,savePath,filename):
     # except RuntimeError as err:
     #     print("Error in reading the file")
     #     print(err)
+msh2xdmf(loadPath,savePath,filename)

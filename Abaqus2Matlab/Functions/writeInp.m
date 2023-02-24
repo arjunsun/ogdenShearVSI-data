@@ -32,7 +32,7 @@ for i=1:1:length(Elements_Sets)
     for j=1:1:length(Elements_Sets{i}.Elements) %Loop for the elements in the elements set
         IE=Elements_Sets{i}.Elements(j); %Elements indices in elements sets
         NNN=[num2str(IE) ', '];
-        for k=1:1:length(Elements{IE})    
+        for k=1:1:4%length(Elements{IE})    
             NNN=[NNN num2str(Elements{IE}(k)) ', '];
         end
         NNN=NNN(1:end-2);
