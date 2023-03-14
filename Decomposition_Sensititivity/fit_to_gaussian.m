@@ -5,12 +5,12 @@ close all;
 %% Flags to turn stuff on and off
 % 1 if you want x, 0 if not
 % histogram and gaussian fit always on 
-plot_gauss = 0;%1;
+plot_gauss = 1;
 surfs_on = 0;%1;
 outside_gauss = 0;%1;
-all_ent_plot = 0;
+all_ent_plot = 0;%1;
 check_bins = 1;%0;
-
+gauss_data = 1;%0;
 %% Generate data (read in from wavy sweep sim)
 % X = randn(1000,2);
 load('22-1215-Wavy_Sweep\sensitivity.mat');
@@ -38,6 +38,8 @@ for ii=6%1:11
     [lam_bin,k_bin,h] = ndhist(X,'axis',[1,0;2,1],'bins',binfactor);
     colormap turbo
     hold on
+    xlabel('\lambda')
+    ylabel('k')
 
     % Calculate pointwise (binwise) entropy
     p = h'./sum(h(:));
@@ -132,6 +134,15 @@ if all_ent_plot
     ylabel('percentage contribution')
 end
 
+%% Look at histogram binning effects for data from Gaussian
+if gauss_data
+    X = mvnrnd(Mu,Sigma,10000);
+    figure()
+    scatter(X(:,1),X(:,2),'.')
+    xlabel('\lambda')
+    ylabel('k')
+    xlim([1,2])
+end
 %% Effect of bin size/number
 if check_bins
     bf_range = logspace(-0.5,1.5,20);
@@ -153,7 +164,7 @@ if check_bins
         H_bins(ii) = H_pwise;
     end
     
-    % Baseline values (for bin size = 0.01, hard coded)
+    % Baseline values (for bin size = 0.01, hard coded, change with dataset)
     bins_baseline = 10201;
     H_baseline = 7.9139;
     
@@ -165,11 +176,18 @@ if check_bins
     figure()
     semilogx(nbins,H_bins,'LineWidth',2);
     hold on
-    plot(bins_baseline,H_baseline,'r*','MarkerSize',10)
+    
     plot(nbins, H_max_theoretical.*ones(size(nbins)),'--k')
-    hold off
     xlabel('number of bins')
     ylabel('entropy')
     xlim([min(nbins) max(nbins)])
-    legend('vary with bin size','baseline (0.01 bin width)','max possible','Location','southeast')
+    if gauss_data
+        plot(nbins,diff_entropy.*ones(size(nbins)),'--m')
+        legend('vary with bin size','max possible','value from Gaussian','Location','east')
+        hold off
+    else
+        plot(bins_baseline,H_baseline,'r*','MarkerSize',10)
+        legend('vary with bin size','max possible','baseline (0.01 bin width)','Location','southeast')
+        hold off
+    end
 end
