@@ -396,7 +396,7 @@ if intbinsFlagY
     
 end
 
-binWidthX = 0.01; binWidthY = 0.01;
+% binWidthX = 0.01; binWidthY = 0.01;
 
 % finally set the bins
 edgesX=axisXY(1):binWidthX:axisXY(2);
