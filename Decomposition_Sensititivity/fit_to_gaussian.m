@@ -9,8 +9,9 @@ plot_gauss = 1;
 surfs_on = 0;%1;
 outside_gauss = 0;%1;
 all_ent_plot = 0;%1;
-check_bins = 1;%0;
-gauss_data = 1;%0;
+check_bins = 0;
+gauss_data = 0;
+sig_effect = 1;%0;
 %% Generate data (read in from wavy sweep sim)
 % X = randn(1000,2);
 load('22-1215-Wavy_Sweep\sensitivity.mat');
@@ -183,11 +184,95 @@ if check_bins
     xlim([min(nbins) max(nbins)])
     if gauss_data
         plot(nbins,diff_entropy.*ones(size(nbins)),'--m')
-        legend('vary with bin size','max possible','value from Gaussian','Location','east')
+        plot(nbins, log(nbins),'--r')
+        legend('vary with bin size','max possible','value from Gaussian','log(nbins)','Location','east')
         hold off
     else
         plot(bins_baseline,H_baseline,'r*','MarkerSize',10)
         legend('vary with bin size','max possible','baseline (0.01 bin width)','Location','southeast')
         hold off
     end
+end
+%% Effect of sigma
+if sig_effect
+    % Keep mu constant, scale down sigma by just multiplying by a factor <1
+    scale = linspace(0.1,1,5);
+    Sigma_base = Sigma;
+
+    % Look at sigma's effect on both binwise and the analytical form of
+    % entropy
+    sig_diff_ent = zeros(size(scale));
+
+    % Will be plotting all bin vs entropy plots on the same figure to see
+    % impact of sigma, arbitrarily choose to plot on figure 99 in case
+    % other parts of code have generated a lot of plots
+    figure(99)
+    legend_labels = cell(1,length(scale)+2);
+    for jj = 1:length(scale)
+        % Scale down sigma and then generate data
+        Sigma = scale(jj).*Sigma_base;
+        % X = mvnrnd(Mu,Sigma,10000);
+        X = mvnrnd_trn([1,0],[2,1],Mu,Sigma,10000);
+        
+        % Look at various bin sizes (same process as above section)
+        % Again vary bin size/number by varying bin factor in ndhist
+        bf_range = logspace(-0.5,1.5,10);
+        nbins = zeros(size(bf_range));
+        H_bins = nbins;
+        for ii=1:length(bf_range)
+            % Don't actually care about each histogram, so just have them
+            % plot over each other in figure 100
+            figure(100)
+            binfactor = bf_range(ii);
+            [lam_bin,k_bin,h] = ndhist(X,'axis',[1,0;2,1],'bins',binfactor);
+            colormap turbo
+            title(['binfactor = ',num2str(binfactor)])
+            
+            % calculate number of bins
+            nbins(ii) = numel(h);
+        
+            % Calculate pointwise (binwise) entropy
+            p = h'./sum(h(:));
+            H_pwise = -sum(p.*log(p), 'all','omitnan')
+            H_bins(ii) = H_pwise;
+        end
+        % Plot entropy vs bins
+        figure(99)
+        semilogx(nbins,H_bins,'LineWidth',2);
+        hold on
+        % Get legend entry (add all entries at the end)
+        legend_labels{jj} = strcat(num2str(scale(jj)),'*sigma');
+
+        % Also calculate entropy of Gaussian dist (analytical form)
+        D = 2;
+        sig_diff_ent(jj) = (1/2)*(log(det(Sigma)) + (D/2)*(1 + log(2*pi)));
+    end
+    
+    figure(99)
+    % also plot theoretical max entropy (log(N)) for both overall number of
+    % data points and per num of bins
+    b = logspace(2,7,20);
+    N = numel(X)/2;
+    plot(b,log(N).*ones(size(b)),'--')
+    plot(b,log(b),'--')
+    
+    % also add these to the legend
+    legend_labels{jj+1} = 'overall max possible';
+    legend_labels{jj+2} = 'max for num bins';
+    
+    % figure labeling etc.
+    xlim([10^2 10^7]);
+    ylim([4 10]);
+    xlabel('number of bins')
+    ylabel('binwise entropy')
+    title('binwise entropy, effect of sigma')
+    legend(legend_labels,'Location','southeast')
+    hold off
+
+    % Plot result of analytical form
+    figure()
+    plot(scale,sig_diff_ent)
+    xlabel('scale factor on sigma')
+    ylabel('entropy of gaussian')
+    title('differential entropy, effect of sigma')
 end
