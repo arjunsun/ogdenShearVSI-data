@@ -8,10 +8,10 @@ close all;
 plot_gauss = 1;
 surfs_on = 0;%1;
 outside_gauss = 0;%1;
-all_ent_plot = 0;%1;
-check_bins = 0;
-gauss_data = 0;
-sig_effect = 1;%0;
+all_ent_plot = 1;
+check_bins = 0;%1;
+gauss_data = 0;%1;
+sig_effect = 0;%1;
 %% Generate data (read in from wavy sweep sim)
 % X = randn(1000,2);
 load('22-1215-Wavy_Sweep\sensitivity.mat');
@@ -22,7 +22,7 @@ all_pwise_ent = all_diff_ent;
 all_outlier_ent = all_diff_ent;
 all_outlier_contrib = all_diff_ent;
 
-for ii=6%1:11
+for ii=1:11
     % X1 = lam, X2 = k
     X = [lam{ii}' k{ii}'];
     %% visualize raw data - scatter plot
@@ -35,7 +35,7 @@ for ii=6%1:11
     
     %% generate histogram
     figure()
-    binfactor = 10;
+    binfactor = 2;
     [lam_bin,k_bin,h] = ndhist(X,'axis',[1,0;2,1],'bins',binfactor);
     colormap turbo
     hold on
@@ -62,7 +62,8 @@ for ii=6%1:11
     D = 2; % 2 independent variables --> dim(X) = 2
     Sigma = GMModel.Sigma;
     Mu = GMModel.mu;
-    diff_entropy = (1/2)*(log(det(Sigma)) + (D/2)*(1 + log(2*pi)))
+    % diff_entropy = (1/2)*(log(det(Sigma)) + (D/2)*(1 + log(2*pi)))
+    diff_entropy = multivar_trunc(Mu,Sigma)
     all_diff_ent(ii) = diff_entropy;
 %     Sigma1 = GMModel.Sigma(:,:,1);
 %     Sigma2 = GMModel.Sigma(:,:,2);
@@ -122,17 +123,21 @@ if all_ent_plot
     plot(amplitudes,all_diff_ent,'LineWidth',2)
     hold on
     plot(amplitudes,all_pwise_ent,'LineWidth',2)
-    plot(amplitudes,all_outlier_ent,'LineWidth',2)
+    if outside_gauss
+        plot(amplitudes,all_outlier_ent,'LineWidth',2)
+    end
     hold off
     xlabel('Wave amplitude')
     ylabel('simulation entropy')
     legend('Gaussian entropy','pointwise entropy','outlier entropy','Location','northwest')
     % xlim([0,0.8])
-    figure()
-    plot(amplitudes,all_outlier_contrib*100,'LineWidth',2)
-    title('relative entropy contribution of outlier data')
-    xlabel('Wave amplitude')
-    ylabel('percentage contribution')
+    if outside_gauss
+        figure()
+        plot(amplitudes,all_outlier_contrib*100,'LineWidth',2)
+        title('relative entropy contribution of outlier data')
+        xlabel('Wave amplitude')
+        ylabel('percentage contribution')
+    end
 end
 
 %% Look at histogram binning effects for data from Gaussian
